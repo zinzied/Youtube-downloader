@@ -2,4 +2,4 @@ ttkbootstrap
 pytube
 threading
 pydub
-
+plyer
