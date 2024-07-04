@@ -6,9 +6,18 @@ import threading
 from pydub import AudioSegment
 from pydub.utils import which
 import os
+from plyer import notification
 
 # Ensure pydub uses ffmpeg
 AudioSegment.converter = which("ffmpeg")
+
+def show_notification(title, message):
+    notification.notify(
+        title=title,
+        message=message,
+        app_icon=None,
+        timeout=10,
+    )
 
 def on_progress(stream, chunk, bytes_remaining):
     total_size = stream.filesize
@@ -50,8 +59,10 @@ def download_video():
         downloaded_files_listbox.insert(END, os.path.basename(downloaded_file))
         
         messagebox.showinfo("Success", "Download completed!")
+        show_notification("Download Complete", f"Video '{yt.title}' has been downloaded successfully!")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {e}")
+        show_notification("Download Failed", f"An error occurred: {e}")
 
 def start_download_thread():
     download_thread = threading.Thread(target=download_video)
