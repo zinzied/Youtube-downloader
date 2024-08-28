@@ -2,3 +2,4 @@ ttkbootstrap
 pydub
 plyer
 yt-dlp
+tkinterdnd2
