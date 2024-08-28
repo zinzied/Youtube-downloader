@@ -15,6 +15,7 @@ This project is a simple YouTube video downloader that supports downloading vide
 - `pydub`
 - `plyer`
 - `yt-dlp`
+- `tkinterdnd2`
 
 You can install the required packages by running:
 ```sh
