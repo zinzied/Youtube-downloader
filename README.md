@@ -1,7 +1,8 @@
 # Simple YouTube Videos Downloader Format mp4 and mp3.
 
 ## Screenshot
-![image](https://github.com/user-attachments/assets/d570bef9-5913-4a28-b755-4b45d0f12d53)
+
+![image](https://github.com/user-attachments/assets/1e1263ec-a19a-4c6c-a8bf-6d18f093959b)
 
 ```markdown
 # YouTube Video Downloader
