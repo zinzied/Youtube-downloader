@@ -49,15 +49,18 @@ python downloader.py
 
 ## Donations
 
-If you appreciate the project, you can show your support by donating through the link provided in the README.
-```
-
-## 📞 Contact 📞
-1. 📧 Email: [ziedboughdir@gmail.com](mailto:ziedboughdir@gmail.com)
-1. 👤 Facebook Page: [fb.com/Ziedb1984](https://www.facebook.com/Ziedb1984/)
-1. 📲 Telegram: [@Zinzied](https://t.me/Zinzied)
-
-## * Donations:
 * If you feel like showing your love and/or appreciation for this project, then how about shouting me a coffee or Milk :)
 
 [<img src="https://github.com/zinzied/Proxies-Checker/assets/10098794/ebe383f4-0d84-4beb-a029-3ced8192cba9">](https://buymeacoffee.com/zied)
+
+If you appreciate the project, you can show your support by donating through the link provided in the README.
+```
+## 📞 Contact 📞
+1. 📧 Email: [ziedboughdir@gmail.com](mailto:ziedboughdir@gmail.com)
+2. 👤 Facebook Page: [fb.com/Ziedb1984](https://www.facebook.com/Ziedb1984/)
+3. 📲 Telegram: [@Zinzied](https://t.me/Zinzied)
+
+
+
+
+
