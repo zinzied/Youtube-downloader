@@ -28,6 +28,7 @@ pip install -r requirements.txt
 ```sh
 git clone https://github.com/zinzied/Youtube-downloader.git
 cd Youtube-downloader
+ls
 ```
 
 2. Install the required packages:
