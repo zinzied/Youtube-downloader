@@ -1,5 +1,4 @@
 ttkbootstrap
-pytube
-threading
 pydub
 plyer
+yt-dlp
