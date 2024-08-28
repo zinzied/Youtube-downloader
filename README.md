@@ -53,12 +53,11 @@ python downloader.py
 
 [<img src="https://github.com/zinzied/Proxies-Checker/assets/10098794/ebe383f4-0d84-4beb-a029-3ced8192cba9">](https://buymeacoffee.com/zied)
 
-If you appreciate the project, you can show your support by donating through the link provided in the README.
-```
-## 📞 Contact 📞
-1. 📧 Email: [ziedboughdir@gmail.com](mailto:ziedboughdir@gmail.com)
-2. 👤 Facebook Page: [fb.com/Ziedb1984](https://www.facebook.com/Ziedb1984/)
-3. 📲 Telegram: [@Zinzied](https://t.me/Zinzied)
+### 📞 Contact 📞
+
+## 1. 📧 Email: [ziedboughdir@gmail.com](mailto:ziedboughdir@gmail.com)
+## 2. 👤 Facebook Page: [fb.com/Ziedb1984](https://www.facebook.com/Ziedb1984/)
+## 3. 📲 Telegram: [@Zinzied](https://t.me/Zinzied)
 
 
 
