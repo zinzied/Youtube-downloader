@@ -32,31 +32,81 @@ A powerful, feature-rich YouTube downloader with modern GUI and advanced functio
 
 ## 📋 Requirements
 
+### Python Dependencies
 - `ttkbootstrap` - Modern GUI framework
-- `pydub` - Audio processing
 - `plyer` - Desktop notifications
 - `yt-dlp` - YouTube downloading engine
 - `tkinterdnd2` - Drag and drop support
 - `pillow` - Image processing for thumbnails
 - `requests` - HTTP requests for thumbnails
 
+### System Requirements
+- **Python 3.7+** (Required)
+- **FFmpeg** (Recommended for best experience)
+  - Required for audio conversion (MP3, AAC, etc.)
+  - Required for high-quality video downloads
+  - Required for merging video and audio streams
+
 ## 🛠️ Installation
 
+### Quick Start (Recommended)
 1. **Clone the repository:**
 ```bash
 git clone https://github.com/zinzied/Youtube-downloader.git
 cd Youtube-downloader
 ```
 
-2. **Install dependencies:**
+2. **Run the launcher (handles dependencies automatically):**
+```bash
+python run_downloader.py
+```
+
+### Manual Installation
+1. **Clone the repository:**
+```bash
+git clone https://github.com/zinzied/Youtube-downloader.git
+cd Youtube-downloader
+```
+
+2. **Install Python dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Run the application:**
+3. **Install FFmpeg (Optional but recommended):**
+
+**Windows:**
+- Run `install_ffmpeg.bat` as Administrator, OR
+- Run `python install_ffmpeg.py`, OR
+- Use the auto-installer in the application's About tab
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+4. **Run the application:**
 ```bash
 python downloader.py
 ```
+
+## ⚠️ FFmpeg Installation
+
+FFmpeg is essential for the best experience. Without it:
+- Audio downloads will be in original format (usually M4A or WEBM)
+- Video downloads will be limited to single-file formats
+- Some quality options may not be available
+
+### Easy FFmpeg Installation:
+1. **Use the built-in installer**: Open the app → About tab → "Auto Install FFmpeg"
+2. **Use provided scripts**: Run `install_ffmpeg.bat` (Windows) or `install_ffmpeg.py`
+3. **Manual installation**: Follow the guide in the application's About tab
 
 ## 📖 Usage Guide
 

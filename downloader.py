@@ -3,11 +3,6 @@ from ttkbootstrap.constants import *
 from tkinter import filedialog, messagebox, Listbox, END, Menu, Text, Scrollbar
 import threading
 import os
-import json
-import re
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional
 import requests
 from PIL import Image, ImageTk
 import io
@@ -493,6 +488,36 @@ Libraries: yt-dlp, ttkbootstrap, tkinter, PIL, requests
         credits_label = ttk.Label(credits_frame, text=credits_text, justify='left')
         credits_label.pack(anchor='w')
 
+        # System Requirements
+        requirements_frame = ttk.LabelFrame(content_frame, text="System Requirements", padding=15)
+        requirements_frame.pack(fill='x', pady=(0, 20))
+
+        # Check FFmpeg status
+        ffmpeg_status = "✅ Installed" if self._check_ffmpeg() else "❌ Not Found"
+        requirements_text = f"""
+FFmpeg: {ffmpeg_status}
+Python: ✅ {os.sys.version.split()[0]}
+        """.strip()
+
+        requirements_label = ttk.Label(requirements_frame, text=requirements_text, justify='left')
+        requirements_label.pack(anchor='w')
+
+        if not self._check_ffmpeg():
+            ffmpeg_help_frame = ttk.Frame(requirements_frame)
+            ffmpeg_help_frame.pack(fill='x', pady=(10, 0))
+
+            ttk.Label(ffmpeg_help_frame, text="FFmpeg is required for audio conversion and high-quality video downloads.",
+                     foreground='red').pack(anchor='w')
+
+            buttons_frame = ttk.Frame(ffmpeg_help_frame)
+            buttons_frame.pack(anchor='w', pady=(5, 0))
+
+            ttk.Button(buttons_frame, text="Install FFmpeg Guide",
+                      command=self.show_ffmpeg_guide, bootstyle=WARNING).pack(side='left', padx=(0, 10))
+
+            ttk.Button(buttons_frame, text="Auto Install FFmpeg",
+                      command=self.auto_install_ffmpeg, bootstyle=SUCCESS).pack(side='left')
+
         # Links
         links_frame = ttk.Frame(content_frame)
         links_frame.pack(fill='x')
@@ -916,24 +941,44 @@ Libraries: yt-dlp, ttkbootstrap, tkinter, PIL, requests
         format_type = item['format']
         quality = item['quality']
 
+        # Check if ffmpeg is available
+        ffmpeg_available = self._check_ffmpeg()
+
         if format_type in ['mp3', 'aac', 'ogg', 'wav', 'm4a']:
-            # Audio format - use yt-dlp's built-in audio extraction
-            ydl_opts['format'] = 'bestaudio/best'
-            ydl_opts['postprocessors'] = [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': format_type,
-                'preferredquality': quality if quality != 'best' else '192',
-            }]
-            # Ensure we have ffmpeg available for audio conversion
-            ydl_opts['prefer_ffmpeg'] = True
+            # Audio format
+            if ffmpeg_available:
+                ydl_opts['format'] = 'bestaudio/best'
+                ydl_opts['postprocessors'] = [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': format_type,
+                    'preferredquality': quality if quality != 'best' else '192',
+                }]
+            else:
+                # Fallback to best audio format available without conversion
+                ydl_opts['format'] = 'bestaudio/best'
+                messagebox.showwarning("FFmpeg Not Found",
+                    "FFmpeg is not installed. Audio will be downloaded in its original format.\n"
+                    "To enable audio conversion, please install FFmpeg.")
         else:
             # Video format
-            if quality == 'best':
-                ydl_opts['format'] = 'bestvideo+bestaudio/best'
-            elif quality == 'worst':
-                ydl_opts['format'] = 'worstvideo+worstaudio/worst'
+            if ffmpeg_available:
+                if quality == 'best':
+                    ydl_opts['format'] = 'bestvideo+bestaudio/best'
+                elif quality == 'worst':
+                    ydl_opts['format'] = 'worstvideo+worstaudio/worst'
+                else:
+                    ydl_opts['format'] = f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]'
             else:
-                ydl_opts['format'] = f'bestvideo[height<={quality}]+bestaudio/best[height<={quality}]'
+                # Fallback to single file formats that don't require merging
+                if quality == 'best':
+                    ydl_opts['format'] = 'best'
+                elif quality == 'worst':
+                    ydl_opts['format'] = 'worst'
+                else:
+                    ydl_opts['format'] = f'best[height<={quality}]'
+                messagebox.showwarning("FFmpeg Not Found",
+                    "FFmpeg is not installed. Video quality may be limited.\n"
+                    "To enable high-quality video downloads, please install FFmpeg.")
 
         # Add subtitle options
         if item.get('subtitles', False):
@@ -941,6 +986,212 @@ Libraries: yt-dlp, ttkbootstrap, tkinter, PIL, requests
             ydl_opts['subtitleslangs'] = config.get('subtitle_languages', ['en'])
 
         return ydl_opts
+
+    def _check_ffmpeg(self):
+        """Check if ffmpeg is available"""
+        try:
+            import subprocess
+            result = subprocess.run(['ffmpeg', '-version'],
+                                  capture_output=True, text=True, timeout=5)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+            return False
+
+    def show_ffmpeg_guide(self):
+        """Show FFmpeg installation guide"""
+        guide_window = ttk.Toplevel(self.root)
+        guide_window.title("FFmpeg Installation Guide")
+        guide_window.geometry("600x500")
+        guide_window.resizable(True, True)
+
+        # Create scrollable text widget
+        text_frame = ttk.Frame(guide_window)
+        text_frame.pack(fill='both', expand=True, padx=20, pady=20)
+
+        text_widget = Text(text_frame, wrap='word', font=('Arial', 10))
+        scrollbar = Scrollbar(text_frame, orient='vertical', command=text_widget.yview)
+        text_widget.configure(yscrollcommand=scrollbar.set)
+
+        guide_text = """FFmpeg Installation Guide
+
+FFmpeg is required for:
+• Converting audio to MP3, AAC, OGG formats
+• Merging high-quality video and audio streams
+• Downloading videos in specific qualities
+
+WINDOWS INSTALLATION:
+
+Method 1: Using Chocolatey (Recommended)
+1. Install Chocolatey package manager from: https://chocolatey.org/install
+2. Open Command Prompt as Administrator
+3. Run: choco install ffmpeg
+4. Restart the application
+
+Method 2: Manual Installation
+1. Go to: https://ffmpeg.org/download.html
+2. Click "Windows" and download from gyan.dev or BtbN
+3. Extract the zip file to C:\\ffmpeg
+4. Add C:\\ffmpeg\\bin to your system PATH:
+   - Press Win+R, type "sysdm.cpl", press Enter
+   - Click "Environment Variables"
+   - Under "System Variables", find "Path" and click "Edit"
+   - Click "New" and add: C:\\ffmpeg\\bin
+   - Click OK on all dialogs
+5. Restart Command Prompt and this application
+
+Method 3: Using Winget (Windows 10/11)
+1. Open Command Prompt
+2. Run: winget install ffmpeg
+3. Restart the application
+
+VERIFICATION:
+After installation, open Command Prompt and type: ffmpeg -version
+You should see version information if installed correctly.
+
+TROUBLESHOOTING:
+• Make sure to restart the application after installing FFmpeg
+• If PATH is not working, try placing ffmpeg.exe in the same folder as this application
+• For permission issues, run Command Prompt as Administrator
+
+Without FFmpeg:
+• Audio downloads will be in original format (usually M4A or WEBM)
+• Video downloads will be limited to single-file formats
+• Some quality options may not be available
+"""
+
+        text_widget.insert(1.0, guide_text)
+        text_widget.config(state='disabled')
+
+        text_widget.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+
+        # Buttons
+        button_frame = ttk.Frame(guide_window)
+        button_frame.pack(fill='x', padx=20, pady=(0, 20))
+
+        ttk.Button(button_frame, text="Open FFmpeg Website",
+                  command=lambda: webbrowser.open("https://ffmpeg.org/download.html"),
+                  bootstyle=INFO).pack(side='left', padx=(0, 10))
+
+        ttk.Button(button_frame, text="Check Again",
+                  command=lambda: self.check_ffmpeg_and_update(guide_window),
+                  bootstyle=SUCCESS).pack(side='left', padx=(0, 10))
+
+        ttk.Button(button_frame, text="Close",
+                  command=guide_window.destroy,
+                  bootstyle=SECONDARY).pack(side='right')
+
+    def check_ffmpeg_and_update(self, parent_window=None):
+        """Check FFmpeg status and update UI"""
+        if self._check_ffmpeg():
+            messagebox.showinfo("Success", "FFmpeg is now installed and available!", parent=parent_window)
+            if parent_window:
+                parent_window.destroy()
+        else:
+            messagebox.showwarning("Not Found", "FFmpeg is still not found. Please check the installation.", parent=parent_window)
+
+    def auto_install_ffmpeg(self):
+        """Attempt to automatically install FFmpeg"""
+        if messagebox.askyesno("Install FFmpeg",
+                              "This will attempt to install FFmpeg automatically using system package managers.\n\n"
+                              "Do you want to continue?"):
+
+            # Show progress dialog
+            progress_window = ttk.Toplevel(self.root)
+            progress_window.title("Installing FFmpeg")
+            progress_window.geometry("400x200")
+            progress_window.resizable(False, False)
+
+            # Center the window
+            progress_window.transient(self.root)
+            progress_window.grab_set()
+
+            # Progress content
+            ttk.Label(progress_window, text="Installing FFmpeg...",
+                     font=('Arial', 12, 'bold')).pack(pady=20)
+
+            progress_bar = ttk.Progressbar(progress_window, mode='indeterminate')
+            progress_bar.pack(pady=10, padx=20, fill='x')
+            progress_bar.start()
+
+            status_label = ttk.Label(progress_window, text="Checking package managers...")
+            status_label.pack(pady=10)
+
+            # Run installation in separate thread
+            def install_thread():
+                try:
+                    import subprocess
+                    success = False
+
+                    # Update status
+                    self.root.after(0, lambda: status_label.config(text="Checking for Chocolatey..."))
+
+                    # Try Chocolatey first
+                    try:
+                        result = subprocess.run(['choco', '--version'],
+                                              capture_output=True, text=True, timeout=10)
+                        if result.returncode == 0:
+                            self.root.after(0, lambda: status_label.config(text="Installing via Chocolatey..."))
+                            result = subprocess.run(['choco', 'install', 'ffmpeg', '-y'],
+                                                  capture_output=True, text=True, timeout=300)
+                            if result.returncode == 0:
+                                success = True
+                    except (subprocess.TimeoutExpired, FileNotFoundError):
+                        pass
+
+                    if not success:
+                        # Try Winget
+                        self.root.after(0, lambda: status_label.config(text="Checking for Winget..."))
+                        try:
+                            result = subprocess.run(['winget', '--version'],
+                                                  capture_output=True, text=True, timeout=10)
+                            if result.returncode == 0:
+                                self.root.after(0, lambda: status_label.config(text="Installing via Winget..."))
+                                result = subprocess.run(['winget', 'install', 'ffmpeg'],
+                                                      capture_output=True, text=True, timeout=300)
+                                if result.returncode == 0:
+                                    success = True
+                        except (subprocess.TimeoutExpired, FileNotFoundError):
+                            pass
+
+                    # Check if installation was successful
+                    if success and self._check_ffmpeg():
+                        self.root.after(0, lambda: self._show_install_success(progress_window))
+                    else:
+                        self.root.after(0, lambda: self._show_install_failure(progress_window))
+
+                except Exception as e:
+                    self.root.after(0, lambda: self._show_install_error(progress_window, str(e)))
+
+            # Start installation thread
+            thread = threading.Thread(target=install_thread)
+            thread.daemon = True
+            thread.start()
+
+    def _show_install_success(self, progress_window):
+        """Show installation success"""
+        progress_window.destroy()
+        messagebox.showinfo("Success",
+                           "FFmpeg has been installed successfully!\n\n"
+                           "You can now download videos in high quality and convert audio formats.")
+
+    def _show_install_failure(self, progress_window):
+        """Show installation failure"""
+        progress_window.destroy()
+        if messagebox.askyesno("Installation Failed",
+                              "Automatic installation failed. This might be because:\n"
+                              "• No package manager (Chocolatey/Winget) is installed\n"
+                              "• Administrator privileges are required\n"
+                              "• Network connectivity issues\n\n"
+                              "Would you like to see the manual installation guide?"):
+            self.show_ffmpeg_guide()
+
+    def _show_install_error(self, progress_window, error_msg):
+        """Show installation error"""
+        progress_window.destroy()
+        messagebox.showerror("Installation Error",
+                           f"An error occurred during installation:\n{error_msg}\n\n"
+                           "Please try the manual installation method.")
 
     def _progress_hook(self, d, download_id):
         """Progress hook for yt-dlp"""
