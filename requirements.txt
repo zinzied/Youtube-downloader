@@ -1,5 +1,6 @@
 ttkbootstrap
-pydub
 plyer
 yt-dlp
 tkinterdnd2
+pillow
+requests
